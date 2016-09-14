@@ -1,0 +1,147 @@
+<!--
+    Relative paths assume component is being run from inside an app or another component, where dependencies are flat
+    siblings. When this component is run from its own repo (e.g. tests, examples), we assume the server is started with
+    'gulp serve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
+-->
+<link rel="import" href="../polymer/polymer.html"/>
+
+<link rel="import" href="css/px-json-styles.html">
+
+<!--
+A Web Component to view and edit JSON.
+
+##### Usage
+
+    <px-json json='{"foo": "bar"}'></px-json>
+
+@element px-json
+@blurb where does this display?
+@homepage index.html
+@demo index.html
+-->
+
+<dom-module id="px-json">
+  <template>
+    <style include="px-json-styles"></style>
+    <link href="../jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <div id="jsoneditor" style="width: {{width}}; height: {{height}}"></div>
+  </template>
+</dom-module>
+
+<script src="../jsoneditor/dist/jsoneditor.min.js"></script>
+<script>
+  Polymer({
+
+    is: 'px-json',
+
+    /**
+    * Properties block, expose attribute values to the DOM via 'notify'
+    *
+    * @property properties
+    * @type Object
+    */
+    properties: {
+      /*
+      * get/set the JSON to display in this component
+      *
+      * @prop json
+      *
+      */
+      json: {
+        type: Object,
+        value: {},
+        notify: true
+        // observer: '_jsonChanged'
+      },
+      /**
+      * set JSON as a string
+      * @prop jsonString
+      */
+      jsonString: {
+        type: String,
+        observer: '_jsonStringChanged',
+        notify: true
+      },
+      /*
+      * set options to initilize the component. same as jsoneditor options.
+      * @prop options
+      */
+      options: {
+        type: Object,
+        value: {}
+      },
+      /**
+      * set width to render the editor.  default is 100%
+      * @prop width
+      */
+      width: {
+        type: String,
+        value: '100%'
+      },
+      /**
+      * set height to render the editor.  default is 400px
+      * @prop height
+      */
+      height: {
+        type: String,
+        value: '400px'
+      },
+
+      _editor: {
+        type: Object
+      }
+    },
+
+    _object: null,
+    //
+    // listeners: {
+    //   'jsoneditor.change': '_handleEditorChange'
+    // },
+
+    ready: function() {
+      var container = this.$.jsoneditor;
+      var that = this;
+      var defaults = {
+        modes: ['tree', 'code'],
+        // onChange: this._handleEditorChange
+        onChange: function() {
+          console.log('on Change');
+          that.json = that._editor.get();
+          console.log('on Change: ', that.json);
+        }
+        // onChange: this._createOnChangeFunction(this)
+      };
+      this.options.modes = this.options.modes || defaults.modes;
+      this.options.onChange = this.options.onChange || defaults.onChange;
+      this._editor = new JSONEditor(container, this.options);
+      if (this.jsonString) {
+        this._editor.setText(this.jsonString);
+        this.json = this._editor.get();
+      } else {
+        this._editor.set(this.json);
+      }
+    },
+
+    // _createOnChangeFunction: function() {
+    //   console.log('on Change');
+    //   this.json = this._editor.get();
+    //   console.log('on Change: ', this.json);
+    // },
+
+    _jsonStringChanged: function(newVal) {
+      if (this._editor) {
+        this._editor.setText(newVal);
+        this.json = this._editor.get();
+        // this._object = this._editor.get();
+      }
+    }
+
+    // _isNewVal(one, two) {
+    //   var stringOne, stringTwo;
+    //   stringOne = typeof one === 'string' ? one : JSON.stringify(one);
+    //   stringTwo = typeof two === 'string' ? two : JSON.stringify(two);
+    //   return stringOne !== stringTwo;
+    // }
+
+  });
+</script>
