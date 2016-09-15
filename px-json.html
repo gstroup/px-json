@@ -4,8 +4,18 @@
     'gulp serve' (or similar server setup) to enable correct finding of bower dependencies for local runs.
 -->
 <link rel="import" href="../polymer/polymer.html"/>
-
 <link rel="import" href="css/px-json-styles.html">
+
+<!-- adding to the px-json-styles.html didn't seem to work, so adding here for now. -->
+<style>
+  div.jsoneditor-menu {
+    background-color: rgb(40, 134, 175) !important;
+    border-color: rgb(40, 134, 175) !important;
+  }
+  div.jsoneditor {
+    border-color: rgb(40, 134, 175) !important;
+  }
+</style>
 
 <!--
 A Web Component to view and edit JSON.
@@ -15,15 +25,15 @@ A Web Component to view and edit JSON.
     <px-json json='{"foo": "bar"}'></px-json>
 
 @element px-json
-@blurb where does this display?
+@blurb what is the blurb? where does this display?
 @homepage index.html
 @demo index.html
 -->
 
 <dom-module id="px-json">
   <template>
-    <style include="px-json-styles"></style>
     <link href="../jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <style include="px-json-styles"></style>
     <div id="jsoneditor" style="width: {{width}}; height: {{height}}"></div>
   </template>
 </dom-module>
@@ -42,19 +52,21 @@ A Web Component to view and edit JSON.
     */
     properties: {
       /*
-      * get/set the JSON to display in this component
+      * get/set the JSON to display in this component.
+      *  can set to null, but not undefined.
+      *  use json or jsonString, but not both.
       *
       * @prop json
-      *
       */
       json: {
         type: Object,
-        value: {},
-        notify: true
-        // observer: '_jsonChanged'
+        value: function() { return {}; },
+        notify: true,
+        observer: '_jsonChanged'
       },
       /**
-      * set JSON as a string
+      * set JSON as a string.
+      *  use json or jsonString, but not both.
       * @prop jsonString
       */
       jsonString: {
@@ -68,10 +80,10 @@ A Web Component to view and edit JSON.
       */
       options: {
         type: Object,
-        value: {}
+        value: function() { return {}; }
       },
       /**
-      * set width to render the editor.  default is 100%
+      * set width to render the editor.  default is 100%.
       * @prop width
       */
       width: {
@@ -79,7 +91,7 @@ A Web Component to view and edit JSON.
         value: '100%'
       },
       /**
-      * set height to render the editor.  default is 400px
+      * set height to render the editor.  default is 400px.
       * @prop height
       */
       height: {
@@ -92,56 +104,44 @@ A Web Component to view and edit JSON.
       }
     },
 
-    _object: null,
-    //
-    // listeners: {
-    //   'jsoneditor.change': '_handleEditorChange'
-    // },
-
     ready: function() {
+      console.log('ready: ', this);
       var container = this.$.jsoneditor;
+      var options = {};
       var that = this;
       var defaults = {
-        modes: ['tree', 'code'],
-        // onChange: this._handleEditorChange
+        modes: ['code','tree'],
         onChange: function() {
-          console.log('on Change');
           that.json = that._editor.get();
-          console.log('on Change: ', that.json);
+          // console.log('on Change: ', that.json);
         }
-        // onChange: this._createOnChangeFunction(this)
       };
-      this.options.modes = this.options.modes || defaults.modes;
-      this.options.onChange = this.options.onChange || defaults.onChange;
-      this._editor = new JSONEditor(container, this.options);
+      options.modes = this.options.modes || defaults.modes;
+      options.onChange = this.options.onChange || defaults.onChange;
+      options.mode = options.modes[0] || 'tree';
+      this._editor = new JSONEditor(container, options);
       if (this.jsonString) {
-        this._editor.setText(this.jsonString);
-        this.json = this._editor.get();
-      } else {
-        this._editor.set(this.json);
+        this.json = JSON.parse(this.jsonString);
+        // console.log('ready: ', this.json);
       }
+      this._editor.set(this.json);
     },
-
-    // _createOnChangeFunction: function() {
-    //   console.log('on Change');
-    //   this.json = this._editor.get();
-    //   console.log('on Change: ', this.json);
-    // },
 
     _jsonStringChanged: function(newVal) {
       if (this._editor) {
         this._editor.setText(newVal);
         this.json = this._editor.get();
-        // this._object = this._editor.get();
+        // console.log('_jsonStringChanged: ', this.json);
       }
-    }
+    },
 
-    // _isNewVal(one, two) {
-    //   var stringOne, stringTwo;
-    //   stringOne = typeof one === 'string' ? one : JSON.stringify(one);
-    //   stringTwo = typeof two === 'string' ? two : JSON.stringify(two);
-    //   return stringOne !== stringTwo;
-    // }
+    _jsonChanged: function(newVal, oldVal) {
+      // console.log('_jsonChanged: ', newVal);
+      if (typeof newVal === 'undefined') {
+        this.json = oldVal;
+      }
+      // console.log('_jsonChanged, this.json: ', this.json);
+    }
 
   });
 </script>
