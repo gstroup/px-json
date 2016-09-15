@@ -66,13 +66,12 @@ A Web Component to view and edit JSON.
       },
       /**
       * set JSON as a string.
-      *  use json or jsonString, but not both.
+      *  use only to set value, not get.
       * @prop jsonString
       */
       jsonString: {
         type: String,
-        observer: '_jsonStringChanged',
-        notify: true
+        observer: '_jsonStringChanged'
       },
       /*
       * set options to initilize the component. same as jsoneditor options.
@@ -105,13 +104,13 @@ A Web Component to view and edit JSON.
     },
 
     ready: function() {
-      console.log('ready: ', this);
       var container = this.$.jsoneditor;
       var options = {};
       var that = this;
       var defaults = {
         modes: ['code','tree'],
         onChange: function() {
+          that.userChange = true;
           that.json = that._editor.get();
           // console.log('on Change: ', that.json);
         }
@@ -140,6 +139,12 @@ A Web Component to view and edit JSON.
       if (typeof newVal === 'undefined') {
         this.json = oldVal;
       }
+      if (this._editor && !this.userChange) {
+        this.userChange = false;
+        // console.log('JSON CHANGED, NOT USER CHANGE!');
+        this._editor.set(this.json);
+      }
+      this.userChange = false;
       // console.log('_jsonChanged, this.json: ', this.json);
     }
 
