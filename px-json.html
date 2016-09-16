@@ -6,17 +6,6 @@
 <link rel="import" href="../polymer/polymer.html"/>
 <link rel="import" href="css/px-json-styles.html">
 
-<!-- adding to the px-json-styles.html didn't seem to work, so adding here for now. -->
-<style>
-  div.jsoneditor-menu {
-    background-color: rgb(40, 134, 175) !important;
-    border-color: rgb(40, 134, 175) !important;
-  }
-  div.jsoneditor {
-    border-color: rgb(40, 134, 175) !important;
-  }
-</style>
-
 <!--
 A Web Component to view and edit JSON.
 
@@ -31,10 +20,15 @@ A Web Component to view and edit JSON.
 -->
 
 <dom-module id="px-json">
+  <!-- This is a deprecated way to import css, but it works with vulcanize for now. -->
+  <link rel="import" type="css" href="../jsoneditor/dist/jsoneditor.min.css">
   <template>
-    <link href="../jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <!-- This worked locally, but not when included in a vulcanized project:
+     <link href="../jsoneditor/dist/jsoneditor.min.css" rel="stylesheet" type="text/css"> -->
     <style include="px-json-styles"></style>
-    <div id="jsoneditor" style="width: {{width}}; height: {{height}}"></div>
+    <div id="styleContainer">
+      <div id="jsoneditor" style="width: {{width}}; height: {{height}}"></div>
+    </div>
   </template>
 </dom-module>
 
@@ -107,8 +101,10 @@ A Web Component to view and edit JSON.
       var container = this.$.jsoneditor;
       var options = {};
       var that = this;
+      this.scopeSubtree(this.$.styleContainer, true);
       var defaults = {
-        modes: ['code','tree'],
+        // modes: ['code','tree'],
+        mode: 'code',
         onChange: function() {
           that.userChange = true;
           that.json = that._editor.get();
@@ -117,7 +113,7 @@ A Web Component to view and edit JSON.
       };
       options.modes = this.options.modes || defaults.modes;
       options.onChange = this.options.onChange || defaults.onChange;
-      options.mode = options.modes[0] || 'tree';
+      options.mode = this.options.mode || defaults.mode;
       this._editor = new JSONEditor(container, options);
       if (this.jsonString) {
         this.json = JSON.parse(this.jsonString);

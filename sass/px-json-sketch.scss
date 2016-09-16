@@ -30,8 +30,13 @@ Predix branding rules go in px-json-predix.scss, not in this file.
 @import "px-flexbox-design/_base.flexbox.scss";
 @import "px-viewport-design/_base.viewport.scss";
 
+
 div.jsoneditor-menu {
-  background-color: black!important;
+  background-color: rgb(40, 134, 175) !important;
+  border-color: rgb(40, 134, 175) !important;
+}
+div.jsoneditor {
+  border-color: rgb(40, 134, 175) !important;
 }
 
 
