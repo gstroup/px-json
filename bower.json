@@ -23,7 +23,7 @@
   "dependencies": {
     "polymer": "^1.6.0",
     "px-theme": "~1.1.2",
-    "jsoneditor": "^5.5.7"
+    "jsoneditor": "5.5.7"
   },
   "devDependencies": {
     "px-forms-design": "#~0.3.15",
